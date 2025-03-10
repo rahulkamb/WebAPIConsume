@@ -20,10 +20,14 @@ namespace APIConsume.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get(int pageNumber=1 )
+        public IActionResult Get(int pg = 1,int pageSize=10)
         {
             List<EmployeeVM> employees = new List<EmployeeVM>();
             string empAPI = _configuration["EmpAPI"];
+            if (pg <= 0)
+            {
+                pg = 1;
+            }
             using(var client =  new HttpClient())
             {
                 client.BaseAddress = new Uri(empAPI);
@@ -34,7 +38,12 @@ namespace APIConsume.Controllers
                 {
                     var jsonData = response.Content.ReadAsStringAsync().Result;
                     employees = JsonConvert.DeserializeObject<List<EmployeeVM>>(jsonData);
-                    return View(employees);
+                    int totalItems = employees.Count();
+                    var pagination = new Pagination(totalItems,pg, pageSize);
+                    var recSkip = ((pg - 1) * pageSize);
+                    var data = employees.Skip(recSkip).Take(pageSize).ToList();
+                    ViewBag.pager = pagination;
+                    return View(data);
                 }
                 else
                 {
