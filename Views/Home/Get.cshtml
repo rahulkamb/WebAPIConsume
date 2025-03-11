@@ -13,16 +13,18 @@
 }
 
 <body>
-    <div class="d-flex align-items-center mt-4">
-        
-            <h1>Employee List</h1>
-           @*  <form asp-controller="Home" asp-action="Get">
-                <span>
-                    <input placeholder="Search" type="text" name="SearchText" class="form-control" />
-                    <input type="button" />
-                </span>
-            </form> *@
-            <div class="dropdown ms-4">
+    <div class="d-flex align-items-center mb-2">
+        <div class="col d-inline-flex align-items-center" style="margin-right:5rem;">
+            <div class="me-4rem" style="margin-right:2rem;">
+                <form asp-controller="Home" asp-action="Get">
+                    <span class="d-flex">
+                        <input placeholder="Search" type="text" name="SearchText" class="form-control me-3" />
+                        <input type="submit" value="Search" class="p-auto btn btn-info" />
+                    </span>
+                </form>
+            </div>
+
+            <div class="dropdown ms-4" >
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     Select
                 </button>
@@ -33,11 +35,13 @@
                     <li><a class="dropdown-item" asp-action="Get" asp-route-pg="1" asp-route-pageSize="100" value="100">100</a></li>
                 </ul>
             </div>
-         
-        
-        <a asp-action="CreateEmployee" class="btn btn-info text-decoration-none ms-auto" style="color: black;">
-            Create New
-        </a>
+            
+        </div>
+        <div>
+            <a asp-action="CreateEmployee" class="btn btn-info text-decoration-none ms-auto" style="color: black;">
+                Create New
+            </a>
+        </div> 
     </div>
     <table class="table">
         <thead>

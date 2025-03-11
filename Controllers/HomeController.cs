@@ -20,10 +20,11 @@ namespace APIConsume.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get(int pg = 1,int pageSize=10)
+        public IActionResult Get(int pg = 1,int pageSize=10, string SearchText="")
         {
             List<EmployeeVM> employees = new List<EmployeeVM>();
             string empAPI = _configuration["EmpAPI"];
+            string user_key = _configuration["Authentication:userKey"];
             if (pg <= 0)
             {
                 pg = 1;
@@ -32,6 +33,7 @@ namespace APIConsume.Controllers
             {
                 client.BaseAddress = new Uri(empAPI);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("user_key",user_key);
 
                 HttpResponseMessage response = client.GetAsync("get/Get-AllEmployee").Result;
                 if (response.IsSuccessStatusCode)
@@ -39,6 +41,13 @@ namespace APIConsume.Controllers
                     var jsonData = response.Content.ReadAsStringAsync().Result;
                     employees = JsonConvert.DeserializeObject<List<EmployeeVM>>(jsonData);
                     int totalItems = employees.Count();
+                    if (!String.IsNullOrEmpty(SearchText))
+                    {
+                        
+                        var emp = employees.Where(str => str.FirstName.Contains(SearchText)).ToList();
+                        employees.Clear();
+                        employees = emp;
+                    }
                     var pagination = new Pagination(totalItems,pg, pageSize);
                     var recSkip = ((pg - 1) * pageSize);
                     var data = employees.Skip(recSkip).Take(pageSize).ToList();
@@ -66,12 +75,14 @@ namespace APIConsume.Controllers
         {
             List<EmployeeVM> employees = new List<EmployeeVM>();
             string empAPI = _configuration["EmpAPI"];
+            string userKey = _configuration["Authentication:userKey"];
 
             if (ModelState.IsValid)
             {
                 using(var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri(empAPI);
+                    client.DefaultRequestHeaders.Add("user_key", userKey);
                     var json = JsonConvert.SerializeObject(employee);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
                     var response = client.PostAsync("Create/Add-NewUser",content).Result;
@@ -94,10 +105,12 @@ namespace APIConsume.Controllers
         {
             EmployeeVM employees = new EmployeeVM();
             string empAPI = _configuration["EmpAPI"];
+            string userKey = _configuration["Authentication:userKey"];
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(empAPI);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("user_key",userKey);
 
                 HttpResponseMessage response = client.GetAsync("get/Get-EmployeeById/" + id.ToString()).Result;
                 if (response.IsSuccessStatusCode)
@@ -119,11 +132,13 @@ namespace APIConsume.Controllers
         {
             EmployeeVM employees = new EmployeeVM();
             string empAPI = _configuration["EmpAPI"];
+            string userKey = _configuration["Authentication:userKey"];
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(empAPI);
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                                        //https://localhost:7066/api/Home/Delete/Delete-EmployeeById/5
+                //https://localhost:7066/api/Home/Delete/Delete-EmployeeById/5
+                client.DefaultRequestHeaders.Add("user_key", userKey);
                 HttpResponseMessage response = client.DeleteAsync("Delete/Delete-EmployeeById/" + id.ToString()).Result;
                 if (response.IsSuccessStatusCode)
                 {
